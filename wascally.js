@@ -1,0 +1,1 @@
+Wascally = Npm.require('wascally')
