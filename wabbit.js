@@ -2,7 +2,8 @@ let Fiber = Npm.require('fibers'),
   instance = null,
   EventEmitter = Npm.require('events').EventEmitter,
   ee = new EventEmitter()
-class Wabbit {
+
+class WabbitMQ {
   constructor(){
     // this class will be a singleton
     instance = instance || this
@@ -324,4 +325,4 @@ get Queue(){
 }
 }
 
-Wabbit = new Wabbit()
+Wabbit = new WabbitMQ()
