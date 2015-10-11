@@ -1,6 +1,6 @@
 Package.describe({
   name: 'rkstar:wabbit',
-  version: '1.0.2',
+  version: '1.0.3',
   // Brief, one-line summary of the package.
   summary: 'Simplify working with RabbitMQ - built on top of Wascally',
   // URL to the Git repository containing the source code for this package.
@@ -18,6 +18,7 @@ Package.onUse(function(api) {
   api.use('ecmascript', 'server')
   api.use('promise', 'server')
   api.use('underscore', 'server')
+  api.use('reactive-var', 'server')
 
 
   api.addFiles('wascally.js', 'server')
