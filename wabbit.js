@@ -48,11 +48,14 @@ class WabbitMQ {
     this.rabbit = rabbit
     this.ready = true
     // try to empty our messages in memory this.messages
-    //this.messages.map((m)=>{
-    //  (m.type == 'request')
-    //    ? this.request(m.key, m.msg)
-    //    : this.publish(m.key, m.msg)
-    //})
+    let msg = null
+    while( msg = this.messages.shift() ){
+      if( msg.type == 'request' ){
+        this.request(msg.key, msg.msg)
+      } else {
+        this.publish(msg.key, msg.msg)
+      }
+    }
     // ensure that all queues handlers are registered with rabbitmq!
     // map all queues
     _.values(this.exchanges).map((exchange)=>{
