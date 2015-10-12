@@ -1,6 +1,6 @@
 Package.describe({
   name: 'rkstar:wabbit',
-  version: '1.0.4',
+  version: '1.0.5',
   // Brief, one-line summary of the package.
   summary: 'Simplify working with RabbitMQ - built on top of Wascally',
   // URL to the Git repository containing the source code for this package.

@@ -47,6 +47,13 @@ class WabbitMQ {
     }
     this.rabbit = rabbit
     this.ready = true
+    // ensure that all queues handlers are registered with rabbitmq!
+    // map all queues
+    _.values(this.exchanges).map((exchange)=>{
+      this.runExchange(exchange)
+    })
+
+    // everything is registered (trickle-down...)
     // try to empty our messages in memory this.messages
     let msg = null
     while( msg = this.messages.shift() ){
@@ -56,11 +63,6 @@ class WabbitMQ {
         this.publish(msg.key, msg.msg)
       }
     }
-    // ensure that all queues handlers are registered with rabbitmq!
-    // map all queues
-    _.values(this.exchanges).map((exchange)=>{
-      this.runExchange(exchange)
-    })
   }
 
   dump(){
