@@ -100,8 +100,7 @@ class WabbitMQ {
           // this extra arg passed to our handlers will
           // allow the handler to easily know whether or not
           // it has to reply to a request
-          let reply = (msg.properties.replyTo && (msg.properties.replyTo != ''))
-          handler.handler(msg, reply)
+          handler.handler(msg, msg.properties.headers.reply)
         }).run()
       })
     })
@@ -134,7 +133,8 @@ class WabbitMQ {
     }
     let map = this.routeMap[key]
     return this.rabbit.request(map.exchange, _.extend({
-      body: msg
+      body: msg,
+      headers: {reply: true}
     }, _.pick(map, ['routingKey','type'])))
   }
 
@@ -146,7 +146,8 @@ class WabbitMQ {
     }
     let map = this.routeMap[key]
     return this.rabbit.publish(map.exchange, _.extend({
-      body: msg
+      body: msg,
+      headers: {reply: false}
     }, _.pick(map, ['routingKey','type'])))
   }
 
