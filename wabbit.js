@@ -95,14 +95,18 @@ class WabbitMQ {
         queue: queue.name
       }
 
-      this.rabbit.handle(handler.key, (msg)=>{
-        Fiber(()=>{
-          // this extra arg passed to our handlers will
-          // allow the handler to easily know whether or not
-          // it has to reply to a request
-          handler.handler(msg, msg.properties.headers.reply)
-        }).run()
-      })
+      this.rabbit.handle(handler.key, Meteor.bindEnvironment((msg)=>{
+        // this extra arg passed to our handlers will
+        // allow the handler to easily know whether or not
+        // it has to reply to a request
+        handler.handler(msg, (result)=>{
+          if( msg.properties.headers.reply ){
+            msg.reply(result)
+          } else {
+            msg.ack()
+          }
+        })
+      }))
     })
     // all handlers have been init'd for this queue
     this.rabbit.startSubscription(queue.name)
