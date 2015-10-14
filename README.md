@@ -7,6 +7,8 @@ Simplify working with RabbitMQ - built on top of Wascally
 * meteor 1.2.0.2 (uses es2015 syntax)
 * promise
 * underscore
+* ecmascript
+* reactive-var
 * [wascally (0.2.7)](https://github.com/LeanKit-Labs/wascally)
 
 ## Usage
@@ -40,20 +42,20 @@ let readQueue = new Wabbit.Queue({
   
 read.registerHandler({
   key: 'read-from-data-source',
-  handler(msg, reply){
+  handler(msg, ack){
     // ...
     // do something with the msg.body as per Wascally docs
     //
     
     if( some_error_condition ){
       msg.reject()
+      // or
+      msg.nack()
     }
     
-    if( reply ){
-      msg.reply('this message has been handled!') // ... and ack the message from the queue
-    } else {
-      msg.ack() // this will simply ack the message from the queue
-    }
+    // ack this message from the queue and send back a reply if
+    // this message was sent with Wabbit.request (no reply if sent with Wabbit.publish)
+    ack('this message has been handled!')
   })
 })
 
@@ -63,10 +65,12 @@ ex.registerQueue(readQueue)
 Then you send messages to it like this:
 ```javascript
 Wabbit.request('read-from-data-source', {some: 'data'})
-  .then((response)=>{
+  .then(Meteor.bindEnvironment((response)=>{
+    // using Meteor.bindEnvironment is only necessary if you need to have
+    // access to the Meteor environment (or collections) inside this function
     console.log(response)
     // => "this message has been handled!"
-  })
+  }))
 ```
 ... or, if you do not need to know when the action has been completed...
 ```javascript
@@ -76,3 +80,4 @@ Wabbit.publish('read-from-data-source', {more: 'data'})
 ## Reading
 [Wascally](https://github.com/LeanKit-Labs/wascally)
 [RabbitMQ](https://www.rabbitmq.com/)
+[Meteor.bindEnvironment](https://www.eventedmind.com/feed/meteor-what-is-meteor-bindenvironment)
