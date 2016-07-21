@@ -45,8 +45,10 @@ class WabbitMQ {
     if( !rabbit ){
       throw new Meteor.Error(500, `RABBIT service is unavailable! Please make sure you run rabbit.configure() first!`)
     }
+
     this.rabbit = rabbit
     this.ready = true
+
     // ensure that all queues handlers are registered with rabbitmq!
     // map all queues
     _.values(this.exchanges).map((exchange)=>{
@@ -81,35 +83,47 @@ class WabbitMQ {
   }
 
   runQueue(queue, exchange){
-    if( !queue.handlers || (queue.handlers.length < 1) ){
-      return
-    }
-    queue.handlers.map((handler)=>{
-      if( !handler || !handler.key || !handler.handler ){
-        return
+    const startSubscription = (_.isArray(queue.handlers) && queue.handlers.length)
+    if( !startSubscription ){
+      let key
+      while( key = queue.keys.shift() ){
+        const route = {
+          key,
+          exchange: exchange.name,
+          queue: queue.name
+        }
+        this.createRouteMap(route)
       }
-      this.routeMap[handler.key] = {
-        routingKey: handler.key,
-        type: handler.key,
-        exchange: exchange.name,
-        queue: queue.name
-      }
+    } else {
+      queue.handlers.map(handler =>{
+        if( !handler || !handler.key || !handler.handler ){
+          return
+        }
 
-      this.rabbit.handle(handler.key, Meteor.bindEnvironment((msg)=>{
-        // this extra arg passed to our handlers will
-        // allow the handler to easily know whether or not
-        // it has to reply to a request
-        handler.handler(msg, (result)=>{
-          if( msg.properties.headers.reply ){
-            msg.reply(result)
-          } else {
-            msg.ack()
-          }
-        })
-      }))
-    })
-    // all handlers have been init'd for this queue
-    this.rabbit.startSubscription(queue.name)
+        const route = {
+          key: handler.key,
+          exchange: exchange.name,
+          queue: queue.name
+        }
+        this.createRouteMap(route)
+
+        this.rabbit.handle(handler.key, Meteor.bindEnvironment((msg)=>{
+          // this extra arg passed to our handlers will
+          // allow the handler to easily know whether or not
+          // it has to reply to a request
+          handler.handler(msg, (result)=>{
+            if( msg.properties.headers.reply ){
+              msg.reply(result)
+            } else {
+              msg.ack()
+            }
+          })
+        }))
+      })
+
+      // all handlers have been init'd for this queue
+      this.rabbit.startSubscription(queue.name)
+    }
   }
 
   registerExchange(exchange){
@@ -153,6 +167,15 @@ class WabbitMQ {
       body: msg,
       headers: {reply: false}
     }, _.pick(map, ['routingKey','type'])))
+  }
+
+  createRouteMap(route){
+    const {key, exchange, queue} = route
+    this.routeMap[key] = {
+      queue, exchange,
+      routingKey: key,
+      type: key
+    }
   }
 
   get routeMap(){
