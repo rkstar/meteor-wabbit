@@ -1,8 +1,8 @@
 Package.describe({
   name: 'rkstar:wabbit',
-  version: '1.1.4',
+  version: '2.0.0',
   // Brief, one-line summary of the package.
-  summary: 'Simplify working with RabbitMQ - built on top of Wascally',
+  summary: 'Simplify working with RabbitMQ - built on top of Rabbot',
   // URL to the Git repository containing the source code for this package.
   git: 'https://github.com/rkstar/meteor-wabbit',
   // By default, Meteor will default to using README.md for documentation.
@@ -11,19 +11,13 @@ Package.describe({
 })
 
 Package.onUse(function(api) {
-  api.versionsFrom('1.2.0.2')
-
-  Npm.depends({'wascally': '0.2.7'})
-
+  api.versionsFrom('1.3.5.1')
   api.use('ecmascript', 'server')
-  api.use('promise', 'server')
-  api.use('underscore', 'server')
-  api.use('reactive-var', 'server')
+  api.use('modules')
+  api.mainModule('wabbit.js', 'server')
+})
 
-
-  api.addFiles('wascally.js', 'server')
-  api.addFiles('wabbit.js', 'server')
-
-  api.export('Wascally')
-  api.export('Wabbit')
+Npm.depends({
+  rabbot: "1.0.3",
+  lodash: "4.14.0"
 })
