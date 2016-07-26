@@ -1,62 +1,108 @@
-let Fiber = Npm.require('fibers'),
-  instance = null,
-  EventEmitter = Npm.require('events').EventEmitter,
-  ee = new EventEmitter()
+const Rabbot = require('rabbot')
+const  _ = require('lodash')
+const EventEmitter = require('events').EventEmitter
+const ee = new EventEmitter()
+const prefix = '[WABBIT]'
 
-class WabbitMQ {
+let instance = null
+
+class WabbitClass {
   constructor(){
-    // this class will be a singleton
     instance = instance || this
     return instance
   }
 
-  // returns a promise object
-  configure(bindings){
-    // NOTE:
-    // the ${config} being passed in here is expected
-    // to be in the format of wascally config.bindings array!
+  nackOnError(){
+    Rabbot.nackOnError()
+  }
+
+  get debug(){
+    return this._debug || false
+  }
+  set debug(value){
+    this._debug = _.isBoolean(value) ? value : (value)
+  }
+
+  configure(config){
+    // NOTE
+    // we will return a promise that will resolve
+    // after we have fully configured Rabbot AND Wabbit
+    // and registered all of the queues and exchanges
     return new Promise((resolve, reject)=>{
-      if( !bindings || !(bindings instanceof Array) || (bindings.length < 1) ){
-        reject(new Meteor.Error(500, `Wabbit.configure must be passed an [Object]`))
-      } else {
-        bindings.map((config)=>{
-          if( config.exchange ){
-            let ex = new this.Exchange(config.exchange)
-            if( config.target ){
-              let q = new this.Queue({
-                name: config.target,
-                keys: config.keys
-              })
-              ex.registerQueue(q)
+      Rabbot.configure(config)
+        .done(()=>{
+          if( this.debug ){
+            console.log(prefix, "Rabbot configured.")
+          }
+
+          const {bindings} = config
+          if( !bindings || !(bindings instanceof Array) || (bindings.length < 1) ){
+            const err = "Wabbit.configure must be passed an [Object]"
+            if( this.debug ){
+              console.warn(prefix, err)
             }
-            this.registerExchange(ex)
+            reject(new Error(err))
+          } else {
+            bindings.map((config)=>{
+              if( config.exchange ){
+                let ex = new this.Exchange(config.exchange)
+                if( config.target ){
+                  let q = new this.Queue({
+                    name: config.target,
+                    keys: config.keys
+                  })
+                  ex.registerQueue(q)
+                }
+                this.registerExchange(ex)
+              }
+            })
+            // now set up our listener just in case any more exchanges
+            // get added after this point
+            ee.on('register:exchange', this.runExchange)
+            ee.on('register:queue', this.runQueue)
+            if( this.debug ){
+              console.log(prefix, "Wabbit configured.")
+            }
+            this.ready = true
+            resolve()
           }
         })
-        // now set up our listener just in case any more exchanges
-        // get added after this point
-        ee.on('register:exchange', this.runExchange)
-        ee.on('register:queue', this.runQueue)
-        resolve()
-      }
     })
   }
 
-  run(rabbit){
-    if( !rabbit ){
-      throw new Meteor.Error(500, `RABBIT service is unavailable! Please make sure you run rabbit.configure() first!`)
+  dump(){
+    _.values(this.exchanges).map((exchange)=>{
+      console.log(JSON.stringify(exchange, true, 2))
+      _.values(exchange.queues).map((queue)=>{
+        console.log(JSON.stringify(queue, true, 2))
+      })
+    })
+  }
+
+  run(){
+    if( !this.ready ){
+      const err = 'Wabbit has not been configured! Please make sure you run Wabbit.configure() first.'
+      if( this.debug ){
+        console.warn(prefix, err)
+      }
+      throw new Error(err)
     }
-
-    this.rabbit = rabbit
-    this.ready = true
-
     // ensure that all queues handlers are registered with rabbitmq!
     // map all queues
+    if( this.debug ){
+      console.log(prefix, "Running exchanges...")
+    }
     _.values(this.exchanges).map((exchange)=>{
       this.runExchange(exchange)
     })
 
     // everything is registered (trickle-down...)
     // try to empty our messages in memory this.messages
+    if( this.debug ){
+      if( _.isArray(this.messages) && this.messages.length ){
+        console.log(prefix, "Publishing stored messages.")
+      }
+    }
     let msg = null
     while( msg = this.messages.shift() ){
       if( msg.type == 'request' ){
@@ -67,16 +113,10 @@ class WabbitMQ {
     }
   }
 
-  dump(){
-    _.values(this.exchanges).map((exchange)=>{
-      console.log(exchange)
-      _.values(exchange.queues).map((queue)=>{
-        console.log(queue)
-      })
-    })
-  }
-
   runExchange(exchange){
+    if( this.debug ){
+      console.log(prefix, 'Running queues...')
+    }
     _.values(exchange.queues).map((queue)=>{
       this.runQueue(queue, exchange)
     })
@@ -95,7 +135,7 @@ class WabbitMQ {
         this.createRouteMap(route)
       }
     } else {
-      queue.handlers.map(handler =>{
+      queue.handlers.map((handler)=>{
         if( !handler || !handler.key || !handler.handler ){
           return
         }
@@ -107,22 +147,31 @@ class WabbitMQ {
         }
         this.createRouteMap(route)
 
-        this.rabbit.handle(handler.key, Meteor.bindEnvironment((msg)=>{
-          // this extra arg passed to our handlers will
-          // allow the handler to easily know whether or not
-          // it has to reply to a request
-          handler.handler(msg, (result)=>{
-            if( msg.properties.headers.reply ){
-              msg.reply(result)
-            } else {
-              msg.ack()
+        Rabbot
+          .handle(handler.key, Meteor.bindEnvironment((msg)=>{
+              handler.handler(msg, (result)=>{
+                if( msg.properties.headers.reply ){
+                  const reply = _.isUndefined(result) || _.isNull(result) ? {result:null} : result
+                  msg.reply(reply)
+                } else {
+                  msg.ack()
+                }
+              })
+            }))
+          .catch((err, msg)=>{
+            if( this.debug ){
+              console.log(prefix, err)
+              console.log(prefix, msg)
             }
           })
-        }))
       })
 
-      // all handlers have been init'd for this queue
-      this.rabbit.startSubscription(queue.name)
+      // all handlers have been initialized for this queue
+      // we can safely start the subscription
+      if( this.debug ){
+        console.log(prefix, 'Starting subscription on:', queue.name)
+      }
+      Rabbot.startSubscription(queue.name)
     }
   }
 
@@ -130,12 +179,13 @@ class WabbitMQ {
     if( !exchange ){
       return null
     }
+
     if( this.exchanges[exchange.name] ){
       // we have already registered this exchange...
       // let's do ourselves a solid and register
-      // any queues that are registered the incoming exchange
-      _.values(exchange.queues).map((q)=>{
-        this.exchanges[exchange.name].registerQueue(q)
+      // any queues that are registered to this incoming exchange
+      _.values(exchange.queues).map((queue)=>{
+        this.exchanges[exchange.name].registerQueue(queue)
       })
     } else {
       this.exchanges[exchange.name] = exchange
@@ -144,33 +194,66 @@ class WabbitMQ {
   }
 
   request(key, msg){
-    if( !this.rabbit ){
-      console.warn(`queueing request for delivery when rabbit is available.`)
-      this.messages.push(_.extend({type:'request'}, {key, msg}))
+    if( this.debug ){
+      console.log(prefix, 'requested:', key, msg)
+    }
+    if( !Rabbot ){
+      console.warn('Queueing request for delivery when Rabbot is available.')
+      this.messages.push(Object.assign({}, {type:'request'}, {key, msg}))
       return
     }
-    let map = this.routeMap[key]
-    return this.rabbit.request(map.exchange, _.extend({
+
+    const route = this.routeMap[key]
+    if( _.isNull(route) || _.isUndefined(route) ){
+      if( this.debug ){
+        console.log(prefix, 'no route mapped for:', key, route)
+      }
+      return
+    }
+
+    const {type, routingKey, exchange, queue} = route
+    const options = Object.assign({},{
+      routingKey, type,
       body: msg,
-      headers: {reply: true}
-    }, _.pick(map, ['routingKey','type'])))
+      headers: {reply: true},
+      replyTimeout: 2000
+    })
+    if( this.debug ){
+      console.log(prefix, 'requesting w/options:', JSON.stringify(options, true, 2))
+    }
+    return Rabbot.request(exchange, options)
   }
 
   publish(key, msg){
-    if( !this.rabbit ){
-      console.warn(`queueing request for delivery when rabbit is available.`)
-      this.messages.push(_.extend({type:'publish'}, {key, msg}))
+    if( this.debug ){
+      console.log(prefix, 'published:', key, msg)
+    }
+    if( !Rabbot ){
+      console.warn('Queueing request for delivery when Rabbot is available.')
+      this.messages.push(Object.assign({}, {type:'publish'}, {key, msg}))
       return
     }
-    let map = this.routeMap[key]
-    return this.rabbit.publish(map.exchange, _.extend({
-      body: msg,
-      headers: {reply: false}
-    }, _.pick(map, ['routingKey','type'])))
+
+    const route = this.routeMap[key]
+    if( _.isNull(route) || _.isUndefined(route) ){
+      if( this.debug ){
+        console.log(prefix, 'no route mapped for:', key, route)
+      }
+      return
+    }
+
+    const {type, routingKey, exchange, queue} = route
+    const options = Object.assign({},{
+      routingKey, type,
+      body: msg
+    })
+    if( this.debug ){
+      console.log(prefix, 'publishing w/options:', JSON.stringify(options, true, 2))
+    }
+    return Rabbot.publish(exchange, options)
   }
 
-  createRouteMap(route){
-    const {key, exchange, queue} = route
+  createRouteMap({key, queue, exchange}){
     this.routeMap[key] = {
       queue, exchange,
       routingKey: key,
@@ -185,61 +268,37 @@ class WabbitMQ {
     return this._routeMap
   }
   set routeMap(value){
-    if( !(value instanceof Object) ){
-      throw new Meteor.Error(500, `Wabbit.routeMap must be of type [Object] : ${value}`)
-    }
-    this._routeMap = value
+    this._routeMap = _.isObject(value) ? value : {value}
   }
 
   get exchanges(){
     if( !this._exchanges ){
-      this._exchanges = {}
+      this.exchanges = {}
     }
     return this._exchanges
   }
   set exchanges(value){
-    if( !_.isObject(value) ){
-      throw new Meteor.Error(500, `Wabbit.exchanges must be of type [Object] : ${value}`)
-    }
-    this._exchanges = value
-  }
-
-  get rabbit(){
-    return this._rabbit
-  }
-  set rabbit(value){
-    this._rabbit = value
-  }
-
-  get ready(){
-    if( !this._ready ){
-      this.ready = false
-    }
-    return this._ready.get()
-  }
-  set ready(value){
-    if( !_.isBoolean(value) ){
-      throw new Meteor.Error(500, `Wabbit.ready must be a [Boolean] value: ${value}`)
-    }
-    if( typeof this._ready == 'undefined' ){
-      this._ready = new ReactiveVar()
-    }
-    this._ready.set(value)
+    this._exchanges = _.isObject(value) ? value : {value}
   }
 
   get messages(){
-    if( !this._messages ){
-      this.messages = []
-    }
-    return this._messages
+    return this._messages || []
   }
   set messages(value){
-    if( !_.isArray(value) ){
-      throw new Meteor.Error(500, `Wabbit.messages must be of type [Array] : ${value}`)
-    }
-    this._messages = value
+    this._messages = _.isArray(value) ? value : [value]
   }
 
+  get ready(){
+    return this._ready || false
+  }
+  set ready(value){
+    this._ready = _.isBoolean(value) ? value : (value)
+  }
+
+  ///////////////////////////////////////////
+  //
+  // a class within a class!
+  //
   get Exchange(){
     return class {
       constructor(name){
@@ -250,6 +309,7 @@ class WabbitMQ {
         if( !queue ){
           return null
         }
+
         // we have already registered this queue...
         // let's do ourselves a solid and add any
         // routing keys and handlers that are listed in the incoming queue
@@ -274,10 +334,7 @@ class WabbitMQ {
         return this._name
       }
       set name(value){
-        if( !_.isString(value) ){
-          throw new Meteor.Error(500, `Exchange.name must be of type [String] : ${value}`)
-        }
-        this._name = value
+        this._name = _.isString(value) ? value : value.toString()
       }
 
       get queues(){
@@ -287,14 +344,15 @@ class WabbitMQ {
         return this._queues
       }
       set queues(value){
-        if( !_.isObject(value) ){
-          throw new Meteor.Error(500, `Exchange.queues must be of type [Object] : ${value}`)
-        }
-        this._queues = value
+        this._queues = _.isObject(value) ? value : {value}
       }
     }
   }
 
+  ///////////////////////////////////////////
+  //
+  // a class within a class!
+  //
   get Queue(){
     return class {
       constructor(opts){
@@ -303,26 +361,26 @@ class WabbitMQ {
       }
 
       registerHandler(opts){
-        if( !opts || !(opts instanceof Object) ){
-          throw new Meteor.Error(500, `Queue.handler options must be an [Object] with properties {key, handler}`)
+        if( !opts || !_.isObject(opts) ){
+          throw new Error(500, `Queue.handler options must be an [Object] with properties {key, handler}`)
         }
-        if( !opts.key || (this.keys.indexOf(opts.key) == -1) ){
-          throw new Meteor.Error(500, `Queue.handler routing key [${opts.key}] is not available on this queue`)
+
+        const {key, handler} = opts
+        if( !key || !this.hasKey(key) ){
+          throw new Error(501, `Queue.handler routing key [${key}] is not available on this queue`)
         }
-        if( !opts.handler || !(opts.handler instanceof Function) ){
-          throw new Meteor.Error(500, `Queue.handler handler function must be of type [Function]`)
+        if( !handler || !_.isFunction(handler) ){
+          throw new Error(502, `Queue.handler handler function must be of type [Function]`)
         }
-        this.handlers.push(_.pick(opts, ['key','handler']))
+
+        this.handlers.push({key, handler})
       }
 
       get name(){
         return this._name
       }
       set name(value){
-        if( !_.isString(value) ){
-          throw new Meteor.Error(500, `Queue.name must be of type [String] : ${value}`)
-        }
-        this._name = value
+        this._name = _.isString(value) ? value : value.toString()
       }
 
       get keys(){
@@ -332,13 +390,11 @@ class WabbitMQ {
         return this._keys
       }
       set keys(value){
-        if( _.isString(value) ){
-          value = [value]
-        }
-        if( !_.isArray(value) ){
-          throw new Meteor.Error(500, `Queue.keys must be of type [Array] : ${value}`)
-        }
-        this._keys = value
+        this._keys = _.isArray(value) ? value : [value]
+      }
+
+      hasKey(key){
+        return (this.keys.indexOf(key) > -1)
       }
 
       get handlers(){
@@ -348,13 +404,11 @@ class WabbitMQ {
         return this._handlers
       }
       set handlers(value){
-        if( !_.isArray(value) ){
-          throw new Meteor.Error(500, `Queue.handlers must be of type [Array] : ${value}`)
-        }
-        this._handlers = value
+        this._handlers = _.isArray(value) ? value : [value]
       }
     }
   }
 }
 
-Wabbit = new WabbitMQ()
+const Wabbit = new WabbitClass()
+export {Wabbit}
