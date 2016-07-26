@@ -1,3 +1,5 @@
+import {Meteor} from 'meteor/meteor'
+
 const Rabbot = require('rabbot')
 const  _ = require('lodash')
 const EventEmitter = require('events').EventEmitter

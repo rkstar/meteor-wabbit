@@ -1,115 +1,149 @@
 {
   "dependencies": {
-    "wascally": {
-      "version": "0.2.7",
+    "amqplib": {
+      "version": "0.4.2",
+      "resolved": "https://registry.npmjs.org/amqplib/-/amqplib-0.4.2.tgz",
+      "from": "amqplib@>=0.4.0 <0.5.0",
       "dependencies": {
-        "amqplib": {
-          "version": "0.3.2",
-          "dependencies": {
-            "bitsyntax": {
-              "version": "0.0.4"
-            },
-            "buffer-more-ints": {
-              "version": "0.0.2"
-            },
-            "readable-stream": {
-              "version": "1.1.13",
-              "dependencies": {
-                "core-util-is": {
-                  "version": "1.0.1"
-                },
-                "isarray": {
-                  "version": "0.0.1"
-                },
-                "string_decoder": {
-                  "version": "0.10.31"
-                },
-                "inherits": {
-                  "version": "2.0.1"
-                }
-              }
-            },
-            "when": {
-              "version": "3.6.4"
-            }
-          }
-        },
-        "debug": {
-          "version": "2.2.0",
-          "dependencies": {
-            "ms": {
-              "version": "0.7.1"
-            }
-          }
-        },
-        "lodash": {
-          "version": "2.4.2"
-        },
-        "machina": {
-          "version": "1.0.1",
-          "dependencies": {
-            "lodash": {
-              "version": "3.10.1"
-            }
-          }
-        },
-        "monologue.js": {
-          "version": "0.3.3",
-          "dependencies": {
-            "lodash": {
-              "version": "3.10.1"
-            },
-            "riveter": {
-              "version": "git://github.com/ifandelse/riveter.git#0cffebb92117c88543cb4359fb9fd69c2d65dd22",
-              "dependencies": {
-                "lodash": {
-                  "version": "2.4.2"
-                }
-              }
-            }
-          }
-        },
-        "node-uuid": {
-          "version": "1.4.3"
-        },
-        "postal": {
-          "version": "1.0.7",
-          "dependencies": {
-            "lodash": {
-              "version": "3.10.1"
-            }
-          }
-        },
         "when": {
-          "version": "3.0.1"
-        },
-        "whistlepunk": {
-          "version": "0.2.0",
-          "dependencies": {
-            "colors": {
-              "version": "1.0.3"
-            },
-            "debug": {
-              "version": "2.1.1",
-              "dependencies": {
-                "ms": {
-                  "version": "0.6.2"
-                }
-              }
-            },
-            "lodash": {
-              "version": "2.4.1"
-            },
-            "machina": {
-              "version": "1.0.0-1"
-            },
-            "moment": {
-              "version": "2.9.0"
-            },
-            "when": {
-              "version": "3.6.4"
-            }
-          }
+          "version": "3.6.4",
+          "resolved": "https://registry.npmjs.org/when/-/when-3.6.4.tgz",
+          "from": "when@>=3.6.2 <3.7.0"
+        }
+      }
+    },
+    "bitsyntax": {
+      "version": "0.0.4",
+      "resolved": "https://registry.npmjs.org/bitsyntax/-/bitsyntax-0.0.4.tgz",
+      "from": "bitsyntax@>=0.0.4 <0.1.0"
+    },
+    "buffer-more-ints": {
+      "version": "0.0.2",
+      "resolved": "https://registry.npmjs.org/buffer-more-ints/-/buffer-more-ints-0.0.2.tgz",
+      "from": "buffer-more-ints@0.0.2"
+    },
+    "colors": {
+      "version": "1.0.3",
+      "resolved": "https://registry.npmjs.org/colors/-/colors-1.0.3.tgz",
+      "from": "colors@1.0.3"
+    },
+    "core-util-is": {
+      "version": "1.0.2",
+      "resolved": "https://registry.npmjs.org/core-util-is/-/core-util-is-1.0.2.tgz",
+      "from": "core-util-is@>=1.0.0 <1.1.0"
+    },
+    "debug": {
+      "version": "2.2.0",
+      "resolved": "https://registry.npmjs.org/debug/-/debug-2.2.0.tgz",
+      "from": "debug@>=2.2.0 <3.0.0"
+    },
+    "inherits": {
+      "version": "2.0.1",
+      "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.1.tgz",
+      "from": "inherits@>=2.0.1 <2.1.0"
+    },
+    "isarray": {
+      "version": "0.0.1",
+      "resolved": "https://registry.npmjs.org/isarray/-/isarray-0.0.1.tgz",
+      "from": "isarray@0.0.1"
+    },
+    "lodash": {
+      "version": "4.14.0",
+      "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.14.0.tgz",
+      "from": "lodash@4.14.0"
+    },
+    "machina": {
+      "version": "1.1.2",
+      "resolved": "https://registry.npmjs.org/machina/-/machina-1.1.2.tgz",
+      "from": "machina@>=1.1.2 <2.0.0",
+      "dependencies": {
+        "lodash": {
+          "version": "3.10.1",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-3.10.1.tgz",
+          "from": "lodash@>=3.0.0 <4.0.0"
+        }
+      }
+    },
+    "moment": {
+      "version": "2.10.2",
+      "resolved": "https://registry.npmjs.org/moment/-/moment-2.10.2.tgz",
+      "from": "moment@2.10.2"
+    },
+    "monologue.js": {
+      "version": "0.3.5",
+      "resolved": "https://registry.npmjs.org/monologue.js/-/monologue.js-0.3.5.tgz",
+      "from": "monologue.js@>=0.3.4 <0.4.0",
+      "dependencies": {
+        "lodash": {
+          "version": "3.10.1",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-3.10.1.tgz",
+          "from": "lodash@>=3.0.0 <4.0.0"
+        }
+      }
+    },
+    "ms": {
+      "version": "0.7.1",
+      "resolved": "https://registry.npmjs.org/ms/-/ms-0.7.1.tgz",
+      "from": "ms@0.7.1"
+    },
+    "node-uuid": {
+      "version": "1.4.7",
+      "resolved": "https://registry.npmjs.org/node-uuid/-/node-uuid-1.4.7.tgz",
+      "from": "node-uuid@>=1.4.7 <2.0.0"
+    },
+    "postal": {
+      "version": "1.0.11",
+      "resolved": "https://registry.npmjs.org/postal/-/postal-1.0.11.tgz",
+      "from": "postal@>=1.0.8 <2.0.0"
+    },
+    "rabbot": {
+      "version": "1.0.3",
+      "resolved": "https://registry.npmjs.org/rabbot/-/rabbot-1.0.3.tgz",
+      "from": "rabbot@1.0.3",
+      "dependencies": {
+        "lodash": {
+          "version": "3.10.1",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-3.10.1.tgz",
+          "from": "lodash@>=3.10.1 <4.0.0"
+        }
+      }
+    },
+    "readable-stream": {
+      "version": "1.1.14",
+      "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-1.1.14.tgz",
+      "from": "readable-stream@>=1.0.0 <2.0.0 >=1.1.9"
+    },
+    "riveter": {
+      "version": "0.2.0",
+      "resolved": "https://registry.npmjs.org/riveter/-/riveter-0.2.0.tgz",
+      "from": "riveter@0.2.0",
+      "dependencies": {
+        "lodash": {
+          "version": "2.4.2",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-2.4.2.tgz",
+          "from": "lodash@>=2.4.1 <3.0.0"
+        }
+      }
+    },
+    "string_decoder": {
+      "version": "0.10.31",
+      "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-0.10.31.tgz",
+      "from": "string_decoder@>=0.10.0 <0.11.0"
+    },
+    "when": {
+      "version": "3.7.7",
+      "resolved": "https://registry.npmjs.org/when/-/when-3.7.7.tgz",
+      "from": "when@>=3.7.5 <4.0.0"
+    },
+    "whistlepunk": {
+      "version": "0.3.3",
+      "resolved": "https://registry.npmjs.org/whistlepunk/-/whistlepunk-0.3.3.tgz",
+      "from": "whistlepunk@>=0.3.2 <0.4.0",
+      "dependencies": {
+        "lodash": {
+          "version": "3.10.1",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-3.10.1.tgz",
+          "from": "lodash@>=3.0.0 <4.0.0"
         }
       }
     }
