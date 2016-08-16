@@ -58,6 +58,12 @@ Then you send messages to it like this:
 ```javascript
 Wabbit.request('read-from-data-source', {some: 'data'})
   .then((response)=>{
+    // NOTE:
+    // if Wabbit.autoAckReply = true =>
+    // the "response" you are getting here is actually the "reply.body"
+    // of the reply from your consumer.  the original reply has already
+    // been ack'd at this point, and the body sent back to this promise
+  
     console.log(response)
     // => "this message has been handled!"
   })
