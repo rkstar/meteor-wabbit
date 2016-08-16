@@ -25,6 +25,13 @@ class WabbitClass {
     this._debug = _.isBoolean(value) ? value : (value)
   }
 
+  get autoAckReply(){
+    return this._autoAckReply || false
+  }
+  set autoAckReply(value){
+    this._autoAckReply = _.isBoolean(value) ? value : (value)
+  }
+
   configure(config){
     // NOTE
     // we will return a promise that will resolve
@@ -224,6 +231,14 @@ class WabbitClass {
       console.log(prefix, 'requesting w/options:', JSON.stringify(options, true, 2))
     }
     return Rabbot.request(exchange, options)
+      .then(response =>{
+        if( this.autoAckReply ){
+          response.ack()
+          return response.body
+        } else {
+          return response
+        }
+      })
   }
 
   publish(key, msg){
