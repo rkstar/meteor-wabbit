@@ -22,6 +22,14 @@ Wabbit.configure(config)
   .then(()=>{ Wabbit.run() })
 ```
 
+## Properties
+*debug* (boolean)
+This option, when true, will console.log a bunch of information as Wabbit is carrying out its operations.
+
+*replyWithBody* (boolean)
+This option, when true, will send back the `reply.body` instead of the full `reply` object from `Wabbit.request`.
+
+
 ## Methods (server)
 You can set up your message handlers like this:
 ```javascript
@@ -59,7 +67,7 @@ Then you send messages to it like this:
 Wabbit.request('read-from-data-source', {some: 'data'})
   .then((response)=>{
     // NOTE:
-    // if Wabbit.autoAckReply = true =>
+    // if Wabbit.replyWithBody = true =>
     // the "response" you are getting here is actually the "reply.body"
     // of the reply from your consumer.  the original reply has already
     // been ack'd at this point, and the body sent back to this promise
