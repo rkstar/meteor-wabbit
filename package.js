@@ -1,6 +1,6 @@
 Package.describe({
   name: 'rkstar:wabbit',
-  version: '2.2.0',
+  version: '2.2.1',
   // Brief, one-line summary of the package.
   summary: 'Simplify working with RabbitMQ - built on top of Rabbot',
   // URL to the Git repository containing the source code for this package.

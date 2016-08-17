@@ -224,8 +224,7 @@ class WabbitClass {
     const options = Object.assign({},{
       routingKey, type,
       body: msg,
-      headers: {reply: true},
-      replyTimeout: 2000
+      headers: {reply: true}
     })
     if( this.debug ){
       console.log(prefix, 'requesting w/options:', JSON.stringify(options, true, 2))
