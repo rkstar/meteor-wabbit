@@ -25,11 +25,11 @@ class WabbitClass {
     this._debug = _.isBoolean(value) ? value : (value)
   }
 
-  get autoAckReply(){
-    return this._autoAckReply || false
+  get replyWithBody(){
+    return this._replyWithBody || false
   }
-  set autoAckReply(value){
-    this._autoAckReply = _.isBoolean(value) ? value : (value)
+  set replyWithBody(value){
+    this._replyWithBody = _.isBoolean(value) ? value : (value)
   }
 
   configure(config){
@@ -232,12 +232,8 @@ class WabbitClass {
     }
     return Rabbot.request(exchange, options)
       .then(response =>{
-        if( this.autoAckReply ){
-          response.ack()
-          return response.body
-        } else {
-          return response
-        }
+        response.ack()
+        return this.replyWithBody ? response.body : response
       })
   }
 
