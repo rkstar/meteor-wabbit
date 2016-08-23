@@ -18,6 +18,10 @@ Configure `Wabbit` with the config vars that you would pass to `Rabbot` when con
 const Wabbit = require('wabbit')
 // Wabbit.nackOnError()
 // Wabbit.debug = true
+
+Wabbit.rejectUnhandled() // only if a dead-letter exchange is defined
+Wabbit.rejectOnError = true // only if a dead-letter exchange is defined
+Wabbit.replyWithBody = true
 Wabbit.configure(config)
   .then(()=>{ Wabbit.run() })
 ```
@@ -25,6 +29,9 @@ Wabbit.configure(config)
 ## Properties
 *debug* (boolean)
 This option, when true, will console.log a bunch of information as Wabbit is carrying out its operations.
+
+*rejectOnError* (boolean)
+This option, when true, will `reject` a message if there is an error.  This should only be used when there is a [dead-letter exchange defined](https://github.com/arobson/rabbot#rejectunhandled).
 
 *replyWithBody* (boolean)
 This option, when true, will send back the `reply.body` instead of the full `reply` object from `Wabbit.request`.
