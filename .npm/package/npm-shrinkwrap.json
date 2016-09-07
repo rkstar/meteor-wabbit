@@ -3,7 +3,7 @@
     "amqplib": {
       "version": "0.4.2",
       "resolved": "https://registry.npmjs.org/amqplib/-/amqplib-0.4.2.tgz",
-      "from": "amqplib@>=0.4.0 <0.5.0",
+      "from": "amqplib@>=0.4.2 <0.5.0",
       "dependencies": {
         "when": {
           "version": "3.6.4",
@@ -53,9 +53,9 @@
       "from": "lodash@4.14.0"
     },
     "machina": {
-      "version": "1.1.2",
-      "resolved": "https://registry.npmjs.org/machina/-/machina-1.1.2.tgz",
-      "from": "machina@>=1.1.2 <2.0.0",
+      "version": "2.0.0",
+      "resolved": "https://registry.npmjs.org/machina/-/machina-2.0.0.tgz",
+      "from": "machina@>=2.0.0 <3.0.0",
       "dependencies": {
         "lodash": {
           "version": "3.10.1",
@@ -72,7 +72,7 @@
     "monologue.js": {
       "version": "0.3.5",
       "resolved": "https://registry.npmjs.org/monologue.js/-/monologue.js-0.3.5.tgz",
-      "from": "monologue.js@>=0.3.4 <0.4.0",
+      "from": "monologue.js@>=0.3.5 <0.4.0",
       "dependencies": {
         "lodash": {
           "version": "3.10.1",
@@ -92,19 +92,19 @@
       "from": "node-uuid@>=1.4.7 <2.0.0"
     },
     "postal": {
-      "version": "1.0.11",
-      "resolved": "https://registry.npmjs.org/postal/-/postal-1.0.11.tgz",
-      "from": "postal@>=1.0.8 <2.0.0"
+      "version": "2.0.4",
+      "resolved": "https://registry.npmjs.org/postal/-/postal-2.0.4.tgz",
+      "from": "postal@>=2.0.4 <3.0.0"
     },
     "rabbot": {
-      "version": "1.0.3",
-      "resolved": "https://registry.npmjs.org/rabbot/-/rabbot-1.0.3.tgz",
-      "from": "rabbot@1.0.3",
+      "version": "1.0.6",
+      "resolved": "https://registry.npmjs.org/rabbot/-/rabbot-1.0.6.tgz",
+      "from": "rabbot@1.0.6",
       "dependencies": {
         "lodash": {
-          "version": "3.10.1",
-          "resolved": "https://registry.npmjs.org/lodash/-/lodash-3.10.1.tgz",
-          "from": "lodash@>=3.10.1 <4.0.0"
+          "version": "4.15.0",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.15.0.tgz",
+          "from": "lodash@>=4.15.0 <5.0.0"
         }
       }
     },
@@ -133,7 +133,7 @@
     "when": {
       "version": "3.7.7",
       "resolved": "https://registry.npmjs.org/when/-/when-3.7.7.tgz",
-      "from": "when@>=3.7.5 <4.0.0"
+      "from": "when@>=3.7.7 <4.0.0"
     },
     "whistlepunk": {
       "version": "0.3.3",
@@ -144,6 +144,23 @@
           "version": "3.10.1",
           "resolved": "https://registry.npmjs.org/lodash/-/lodash-3.10.1.tgz",
           "from": "lodash@>=3.0.0 <4.0.0"
+        },
+        "machina": {
+          "version": "1.1.2",
+          "resolved": "https://registry.npmjs.org/machina/-/machina-1.1.2.tgz",
+          "from": "machina@>=1.0.0 <2.0.0"
+        },
+        "postal": {
+          "version": "1.0.11",
+          "resolved": "https://registry.npmjs.org/postal/-/postal-1.0.11.tgz",
+          "from": "postal@>=1.0.0 <2.0.0",
+          "dependencies": {
+            "lodash": {
+              "version": "4.15.0",
+              "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.15.0.tgz",
+              "from": "lodash@>=4.0.0 <5.0.0"
+            }
+          }
         }
       }
     }
