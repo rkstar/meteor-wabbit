@@ -1,6 +1,6 @@
 Package.describe({
   name: 'rkstar:wabbit',
-  version: '2.2.2',
+  version: '2.2.3',
   // Brief, one-line summary of the package.
   summary: 'Simplify working with RabbitMQ - built on top of Rabbot',
   // URL to the Git repository containing the source code for this package.
@@ -18,6 +18,6 @@ Package.onUse(function(api) {
 })
 
 Npm.depends({
-  rabbot: "1.0.3",
+  rabbot: "1.0.6",
   lodash: "4.14.0"
 })
